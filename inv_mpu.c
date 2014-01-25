@@ -23,7 +23,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 #include "twi.h"
 #include "inv_mpu.h"
 
@@ -33,7 +32,7 @@
  * delay_ms(uint32_t num_ms)
  * min(int a, int b)
  */
-#define min(a,b) fmin(a,b)
+#define min(a,b) ((a)<(b)?(a):(b))
 #define i2c_write   TwiWriteBytes
 #define i2c_read    TwiReadBytes
 #define delay_ms    _delay_ms
