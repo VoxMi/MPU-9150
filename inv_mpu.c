@@ -17,6 +17,7 @@
  *                  MPU9250 (or MPU6500 w/ AK8963 on the auxiliary bus)
  */
 
+#include <avr/pgmspace.h>
 #include <util/delay.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -37,7 +38,7 @@
 #define i2c_read    TwiReadBytes
 #define delay_ms    _delay_ms
 
-#define MPU_DEBUG
+#define MPU_DEBUG	// print some debug messages
 #define MPU9150
 
 #if !defined MPU6050 && !defined MPU9150 && !defined MPU6500 && !defined MPU9250
@@ -613,7 +614,7 @@ uint8_t mpu_reg_dump(void)
 		if (i2c_read(st.hw->addr, ii, 1, &data))
 			return 1;
 #if defined MPU_DEBUG
-		printf("%#5x: %#5x\r\r\n", ii, data);
+		printf_P(PSTR("%#5x: %#5x\r\r\n"), ii, data);
 #endif
 	}
 	return 0;
@@ -670,7 +671,7 @@ uint8_t mpu_init(struct int_param_s *int_param)
 	rev = ((data[5] & 0x01) << 2) | ((data[3] & 0x01) << 1) |
 				(data[1] & 0x01);
 #if defined MPU_DEBUG
-	printf("Software product rev %d\r\n", rev);
+	printf_P(PSTR("Software product rev. %d.\r\n"), rev);
 #endif
 	if (rev)
 	{
@@ -682,7 +683,7 @@ uint8_t mpu_init(struct int_param_s *int_param)
 		else
 		{
 #if defined MPU_DEBUG
-			printf("Unsupported software product rev %d.\r\n", rev);
+			printf_P(PSTR("Unsupported software product rev. %d.\r\n"), rev);
 #endif
 			return 1;
 		}
@@ -695,15 +696,15 @@ uint8_t mpu_init(struct int_param_s *int_param)
 		if (!rev)
 		{
 #if defined MPU_DEBUG
-			printf("Product ID read as 0 indicates device is either "
-						"incompatible or an MPU3050.\r\n");
+			printf_P(PSTR("Product ID read as 0 indicates device is either "
+						"incompatible or an MPU3050.\r\n"));
 #endif
 			return 1;
 		}
 		else if (rev == 4)
 		{
 #if defined MPU_DEBUG
-			printf("Half sensitivity part found.\r\n");
+			printf_P(PSTR("Half sensitivity part found.\r\n"));
 #endif
 			st.chip_cfg.accel_half = 1;
 		}
@@ -719,7 +720,7 @@ uint8_t mpu_init(struct int_param_s *int_param)
 	else
 	{
 #if defined MPU_DEBUG
-		printf("Unsupported software product rev %d.\r\n", rev);
+		printf_P(PSTR("Unsupported software product rev. %d.\r\n"), rev);
 #endif
 		return 1;
 	}
@@ -781,7 +782,7 @@ uint8_t mpu_init(struct int_param_s *int_param)
 
 	mpu_set_sensors(0);
 #if defined MPU_DEBUG
-	printf("Initializing is done...\r\n");
+	printf_P(PSTR("Initializing is done...\r\n"));
 #endif
 	return 0;
 }
@@ -1662,7 +1663,7 @@ uint8_t mpu_read_fifo(int16_t *gyro, int16_t *accel,
 	if (fifo_count < packet_size)
 		return 0;
 #if defined MPU_DEBUG
-    printf("FIFO count: %hd\r\n", fifo_count);
+    printf_P(PSTR("FIFO count: %hd\r\n"), fifo_count);
 #endif
 	if (fifo_count > (st.hw->max_fifo >> 1))
 	{
@@ -2302,9 +2303,12 @@ uint8_t mpu_load_firmware(uint16_t length, const uint8_t *firmware,
 {
 	uint16_t ii;
 	uint16_t this_write;
+	uint8_t *pgm_buf;
+	uint8_t jj;
 	/* Must divide evenly into st.hw->bank_size to avoid bank crossings. */
 #define LOAD_CHUNK  (16)
 	uint8_t cur[LOAD_CHUNK], tmp[2];
+	pgm_buf = (uint8_t *)malloc(LOAD_CHUNK);
 
 	if (st.chip_cfg.dmp_loaded)
 		/* DMP should only be loaded once. */
@@ -2314,13 +2318,14 @@ uint8_t mpu_load_firmware(uint16_t length, const uint8_t *firmware,
 		return 1;
 	for (ii = 0; ii < length; ii += this_write)
 	{
-		this_write = min(LOAD_CHUNK, length - ii);
-		if (mpu_write_mem(ii, this_write, (uint8_t*)&firmware[ii]))
+		this_write = min(LOAD_CHUNK, length - ii);		
+		for (jj = 0; jj < LOAD_CHUNK; jj++) pgm_buf[jj] = pgm_read_byte(firmware + ii + jj);
+		if (mpu_write_mem(ii, this_write, pgm_buf))
 			return 1;
 		if (mpu_read_mem(ii, this_write, cur))
 			return 1;
-		if (memcmp(firmware+ii, cur, this_write))
-			return -2;
+		if (memcmp(pgm_buf, cur, this_write))
+			return 2;
 	}
 
 	/* Set program start address. */
@@ -2394,7 +2399,7 @@ static int setup_compass(void)
 #ifdef AK89xx_SECONDARY
 	uint8_t data[4], akm_addr;
 #if defined MPU_DEBUG
-	printf("Initializing compass...\r\n");
+	printf_P(PSTR("Initializing compass...\r\n"));
 #endif
 	mpu_set_bypass(1);
 
@@ -2411,7 +2416,7 @@ static int setup_compass(void)
 	{
 		/* TODO: Handle this case in all compass-related functions. */
 #if defined MPU_DEBUG
-		printf("Compass not found.\r\n");
+		printf_P(PSTR("Compass not found.\r\n"));
 #endif
 		return 1;
 	}
@@ -2490,7 +2495,7 @@ static int setup_compass(void)
 #ifdef MPU9150
 	/* For the MPU9150, the auxiliary I2C bus needs to be set to VDD. */
 #if defined MPU_DEBUG
-	printf("Initializing compass at IMU...\r\n");
+	printf_P(PSTR("Initializing compass at IMU...\r\n"));
 #endif
 	data[0] = BIT_I2C_MST_VDDIO;
 	if (i2c_write(st.hw->addr, st.reg->yg_offs_tc, 1, data))

@@ -23,6 +23,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
+#include <avr/pgmspace.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include "uart.h"
@@ -39,6 +40,8 @@ int8_t teapotPacket[24] = {'$', 0x02, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 
 bool mpuInterrupt;	// indicates whether MPU interrupt pin has gone high
 
+FILE uart_stream = FDEV_SETUP_STREAM(UartPutchar, NULL, _FDEV_SETUP_RW);
+
 uint16_t dmp_features;
 
 /* The sensors can be mounted onto the board in any orientation. The mounting
@@ -52,8 +55,6 @@ static int8_t gyro_orientation[9] = {1, 0, 0,
 									 0, 1, 0,
 									 0, 0, 1};
 
-FILE uart_stream = FDEV_SETUP_STREAM(UartPutchar, NULL, _FDEV_SETUP_RW);
-
 ISR(INT2_vect)
 {
 	if(bit_is_clear(PIND,PD2))
@@ -62,11 +63,11 @@ ISR(INT2_vect)
 	}
 }
 
-static void EnableInterrupt(void)
+void EnableInterrupt(void)
 {
 	PORTD |= _BV(PD2);
-	EICRA = _BV(ISC21);	// allow interrupts on INT2, triggered on falling edge
-	EIMSK = _BV(INT2);	// enable only on INT2
+	EICRA = _BV(ISC21);	// Allow interrupts on INT2, triggered on falling edge
+	EIMSK = _BV(INT2);	// Enable only on INT2
 }
 
 int main(void)
@@ -93,9 +94,8 @@ int main(void)
 	/* Initializing MPU */
 	result = mpu_init(NULL);
 #if defined MPU_DEBUG
-	printf("Result of mpu_init %d\r\n", result);
+	printf_P(PSTR("Result of mpu_init %d\r\n"), result);
 #endif
-
 	/* Get/set hardware configuration. Start gyro. */
 	/* Wake up all sensors. */
 	mpu_set_sensors(INV_XYZ_GYRO | INV_XYZ_ACCEL | INV_XYZ_COMPASS);
@@ -112,7 +112,7 @@ int main(void)
 	/* Initialize DMP. */
 	result = dmp_load_motion_driver_firmware();
 #if defined MPU_DEBUG
-	printf("Result of load firmware %d\r\n", result);
+	printf_P(PSTR("Result of load firmware %d\r\n"), result);
 #endif
 	dmp_set_orientation(inv_orientation_matrix_to_scalar(gyro_orientation));
 	dmp_features = DMP_FEATURE_6X_LP_QUAT | DMP_FEATURE_SEND_RAW_ACCEL | DMP_FEATURE_SEND_CAL_GYRO | DMP_FEATURE_GYRO_CAL;
@@ -166,7 +166,7 @@ int main(void)
 				teapotPacket[16] = (int8_t)(quat[3] >> 8);
 				teapotPacket[17] = (int8_t)quat[3];
 
-				// Convert temperature to float format
+				// Convert temperature to ASCII format
 				dtostrf((float)(temp_in/pow(2, 16)),4,1,temp_out);
 
 				teapotPacket[18] = temp_out[0];
@@ -183,6 +183,7 @@ int main(void)
 				//printf("accel: %d\t%d\t%d\t\r\n", accel[0], accel[1], accel[2]);
 				//printf("comp: %d\t%d\t%d\t\r\n", compass[0], compass[2], compass[2]);
 				//printf("quat: %ld\t%ld\t%ld\t%ld\t\r\n", quat[0], quat[1], quat[2], quat[3]);
+
 				// for print value in float format you can use floating point printf version (see
 				// Makefile)
 				//printf("%.1f\r\n", temp_in/(pow(2, 16)));

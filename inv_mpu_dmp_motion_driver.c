@@ -14,6 +14,7 @@
  *                  differentiate among MPL and general driver function calls.
  */
 
+#include <avr/pgmspace.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -202,7 +203,7 @@
 
 #define DMP_CODE_SIZE           (3062)
 
-static const uint8_t dmp_memory[DMP_CODE_SIZE] =
+static const uint8_t dmp_memory[DMP_CODE_SIZE] PROGMEM =
 {
 	/* bank # 0 */
 	0x00, 0x00, 0x70, 0x00, 0x00, 0x00, 0x00, 0x24, 0x00, 0x00, 0x00, 0x02, 0x00, 0x03, 0x00, 0x00,
