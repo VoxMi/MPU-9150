@@ -7,3 +7,5 @@ This code compiled by **WinAVR (20121007)** and tested on *ATMega2560*.
 Processing demo file
 --------------------
 At the `Processing/MPUAirplane` you can find a simple **"Processing 2.1"** sketch for visualizing the work with IMU sensors. Additional dependencies for **Processing**: *ToxicLibs* and *OBJLoader* libraries.
+
+At the `Processing/FlightInstruments` you can find sketch with model of attitude indicator that simulates the earth’s horizon. This is a copy of the real flight instrument called an **"Electric Attitude Indicator"** by *Mid-Continent Instrument Co*, **Model: 4300**.
