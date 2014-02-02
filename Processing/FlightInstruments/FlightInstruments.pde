@@ -43,9 +43,10 @@ float[] euler = new float[3];
 float[] ypr = new float[3];
 
 void setup() {
-  size(600, 600, OPENGL);
+  size(1200, 600, OPENGL);
 
   loadTextureAttitudeIndicator();
+  loadTextureDirectionalGyro();
     
   // setup lights and antialiasing
   lights();
@@ -75,9 +76,16 @@ void draw() {
     
   // draw Attitude Indicator (copy of Electric Attitude Indicator by Mid-Continent Instrument Co, Model: 4300-411)
   pushMatrix();
-    translate(width/2, height/2);
+    translate(width/4, height/2);
     scale(0.75);
     drawAttitudeIndicator(-ypr[2], -ypr[1]);
+  popMatrix();
+  
+  // draw Directional Gyro
+  pushMatrix();
+    translate(3*width/4, height/2);
+    scale(0.75);
+    drawDirectionalGyro(-ypr[0]);
   popMatrix();
 }
 
