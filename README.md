@@ -8,4 +8,8 @@ Processing demo file
 --------------------
 At the `Processing/MPUAirplane` you can find a simple **"Processing 2.1"** sketch for visualizing the work with IMU sensors. Additional dependencies for **Processing**: *ToxicLibs* and *OBJLoader* libraries.
 
-At the `Processing/FlightInstruments` you can find sketch with model of attitude indicator that simulates the earth’s horizon. This is a copy of the real flight instrument called an **"Electric Attitude Indicator"** by *Mid-Continent Instrument Co*, **Model: 4300**.
+At the `Processing/FlightInstruments` you can find sketch with model of attitude indicator and directional gyro that simulates the earth’s horizon and сourse deviation indicator. This is a copies of the real flight instruments called an **"Electric Attitude Indicator (Model: 4300)"** and **"Directional Gyro Indicator (Model: 3300)"** by *Mid-Continent Instrument Co*.
+
+NOTE
+----
+This source code does not contain any filters prevent drift from y-axis (YAW).
