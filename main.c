@@ -32,7 +32,7 @@
 #include "inv_mpu.h"
 #include "inv_mpu_dmp_motion_driver.h"
 
-#define MPU_DEBUG				// print some debug messages
+#define MPU_DEBUG		// print some debug messages
 #define DEFAULT_MPU_HZ  (100)	// starting sampling rate
 
 // packet structure for InvenSense teapot demo
@@ -52,8 +52,8 @@ uint16_t dmp_features;
  * chip-to-body matrix for your particular set up.
  */
 static int8_t gyro_orientation[9] = {1, 0, 0,
-									 0, 1, 0,
-									 0, 0, 1};
+				     0, 1, 0,
+				     0, 0, 1};
 
 ISR(INT2_vect)
 {
