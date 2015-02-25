@@ -10,6 +10,8 @@ At the `Processing/MPUAirplane` you can find a simple **"Processing 2.1"** sketc
 
 At the `Processing/FlightInstruments` you can find sketch with model of attitude indicator and directional gyro that simulates the earth’s horizon and сourse deviation indicator. This is a copies of the real flight instruments called an **"Electric Attitude Indicator (Model: 4300)"** and **"Directional Gyro Indicator (Model: 3300)"** by *Mid-Continent Instrument Co*.
 
+![Processing Demo](http://i.imgur.com/lVR7FXa.jpg "Processing Demo")
+
 NOTE
 ----
 This source code does not contain any filters prevent drift from y-axis (YAW).
